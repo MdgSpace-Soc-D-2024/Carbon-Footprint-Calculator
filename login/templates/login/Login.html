@@ -1,0 +1,30 @@
+<html>
+
+    <head>
+        <title> Carbon Footprint Calculator </title>
+    </head>
+
+    <body>
+
+        <h1> Carbon Footprint Calculator </h1>
+        
+        <form action = "" method = "POST">
+            {%csrf_token%}
+            
+            {{ form.as_p }}
+            
+            <button type="submit"> Login me in! </button>
+            
+        </form>
+
+        <form action = "register">
+
+            {%csrf_token%}
+
+            <button type = "submit"> I'm a new user, register me! </button>
+        
+        </form>
+
+    </body>
+
+</html>
