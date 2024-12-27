@@ -41,10 +41,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'login'
+    'login',
+    'footprintdata',
+    'home'
 ]
 
-AUTH_USER_MODEL = 'login.User'
+AUTH_USER_MODEL = 'login.CustomUser'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -83,7 +85,7 @@ WSGI_APPLICATION = 'cfpc_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'CarbonFootprintCalculator', # Database name
+        'NAME': os.getenv('DB_NAME'), # Database name
         'USER': os.getenv('DB_USER'), # Database user
         'PASSWORD': os.getenv('DB_PASSWORD'), # Database password
         'HOST': os.getenv('DB_HOST'), # Database host
@@ -116,8 +118,7 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
     'django.contrib.auth.hashers.Argon2PasswordHasher',
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
-    'django.contrib.auth.hashers.BCryptPasswordHasher',
-    'mysite.hashers.LegacyPasswordHasher'
+    'django.contrib.auth.hashers.BCryptPasswordHasher'
 ]
 
 
@@ -138,6 +139,8 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'static'
+
+LOGIN_URL = '/login'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
