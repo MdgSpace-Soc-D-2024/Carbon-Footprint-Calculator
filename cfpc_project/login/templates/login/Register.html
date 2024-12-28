@@ -10,7 +10,7 @@
         
         <h1> Carbon Footprint Calculator </h1>
 
-        <form action = "trying_it_out" method = "POST">
+        <form action = "{% url 'register' %}" method = "POST">
             {%csrf_token%}
 
             {{ form.as_p }}

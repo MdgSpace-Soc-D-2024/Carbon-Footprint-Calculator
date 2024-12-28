@@ -58,8 +58,11 @@ def register(request):
                 if models.CustomUser.objects.filter(username = username).exists():
                     messages.error(request, "Username already exists.")
                     return redirect('register')
-                
-                form.save()
+
+                user = form.save(commit = False)
+                user.set_password(password)
+                user.save()
+
                 messages.success(request, "Registration with Carbon Footprint Calculator was successful!")
                 return redirect('trying_it_out')
             
