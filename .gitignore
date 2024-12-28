@@ -1,0 +1,13 @@
+# Python bytecode files
+*.pyc
+*.pyo
+__pycache__/
+
+# Virtual environment directory
+myvenv/
+
+# Django secret key
+*.env
+
+# IDE files
+.vscode/
