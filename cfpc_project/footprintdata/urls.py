@@ -18,8 +18,8 @@ from django.urls import path
 from footprintdata import views
 
 urlpatterns = [
-    path('insertdata', views.insertdata, name = 'insertdata'),
-    path('viewdata', views.viewdata, name = 'viewdata'),
-    path('sharedata', views.sharedata, name = 'sharedata'),
-    path('viewshareddata', views.viewshareddata, name = 'viewshareddata')
+    path('insertdata/', views.insertdata, name = 'insertdata'),
+    path('viewdata/', views.viewdata, name = 'viewdata'),
+    path('sharedata/', views.sharedata, name = 'sharedata'),
+    path('viewshareddata/', views.viewshareddata, name = 'viewshareddata')
 ]

@@ -21,16 +21,12 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     
     path('', include('login.urls')),
-    path('login', include('login.urls')),
-    path('register', include('login.urls')),
-    path('trying_it_out', include('login.urls')),
-    path('logout', include('login.urls')),
+    path('register/', include('login.urls')),
+    path('trying_it_out/', include('login.urls')),
+    path('logout/', include('login.urls')),
 
-    path('home', include('home.urls')),
+    path('home/', include('home.urls')),
 
-    path('insertdata', include('footprintdata.urls')),
-    path('viewdata', include('footprintdata.urls')),
-    path('sharedata', include('footprintdata.urls')),
-    path('viewshareddata', include('footprintdata.urls'))
+    path('footprintdata/', include('footprintdata.urls')),
 
 ]

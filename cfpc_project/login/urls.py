@@ -19,7 +19,6 @@ from login import views
 
 urlpatterns = [
     path('', views.login, name = 'login'),
-    path('login', views.login, name = 'login'),
     path('register', views.register, name = 'register'),
     path('trying_it_out', views.trying_it_out, name = 'trying_it_out'),
     path('logout', views.logout, name = 'logout')
