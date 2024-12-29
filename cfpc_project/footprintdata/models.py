@@ -8,18 +8,18 @@ from login import models as login_models
 class Footprints(models.Model):
     
     class Activities(models.IntegerChoices):
-        Electricity = 1,
-        Food = 2,
-        Internet = 3,
+        Electricity = 1
+        Food = 2
+        Internet = 3
         Travel = 4
 
     # types:
     class Electricity(models.IntegerChoices):
         # Electricity
-        Coal = 1,
-        Oil = 2,
+        Coal = 1
+        Oil = 2
         NaturalGas = 3, "Natural Gas"
-        Biomass = 4,
+        Biomass = 4
         Solar = 5, "Solar Rooftop"
         Wind = 6, "Wind Power"
         Hydro = 7, "Hydropower"
@@ -27,30 +27,30 @@ class Footprints(models.Model):
     
     class Food(models.IntegerChoices):
         # Food
-        Ale = 1, 
-        Almonds = 2, 
-        Apples = 3, 
-        Apricot = 4, 
-        Asparagus = 5, 
-        Avocados = 6,
-        Bacon = 7, 
-        Bananas = 8, 
-        Beans = 9, 
+        Ale = 1
+        Almonds = 2
+        Apples = 3
+        Apricot = 4
+        Asparagus = 5
+        Avocados = 6
+        Bacon = 7
+        Bananas = 8
+        Beans = 9
         BeefBurger = 10, "Beef Burger"
         BeefCurry = 11, "Beef Curry"
         BeefMeatballs = 12, "Beef Meat Balls"
         BeefNoodles = 13, "Beef Noodles"
-        Beer = 14,
-        Beetroot = 15, 
-        Biscuits = 16, 
-        Bread = 17, 
+        Beer = 14
+        Beetroot = 15
+        Biscuits = 16
+        Bread = 17
         BreakfastCereal = 18, "Breakfast Cereal"
-        Broccoli = 19, 
-        Butter = 20, 
-        Cabbage = 21, 
-        Carrots = 22, 
-        Cashewnuts = 23, 
-        Cauliflower = 24,
+        Broccoli = 19
+        Butter = 20
+        Cabbage = 21
+        Carrots = 22
+        Cashewnuts = 23
+        Cauliflower = 24
         CheddarCheese = 25, "Cheddar Cheese"
         CheeseCake = 26, "Cheese Cake"
         ChickenBurger = 27, "Chicken Burger"
@@ -60,123 +60,123 @@ class Footprints(models.Model):
         ChickenSausages = 31, "Chicken Sausages"
         ChickenThighs = 32, "Chicken Thighs"
         ChickenWings = 33, "Chicken Wings"
-        Chickpeas = 34, 
+        Chickpeas = 34
         ChocolateBiscuits = 35, "Chocolate Biscuits"
         ChocolateCake = 36, "Chocolate Cake"
         CoconutMilk = 37, "Coconut Milk"
-        Coffee = 38, 
-        Cookies = 39, 
+        Coffee = 38
+        Cookies = 39
         CottageCheese = 40, "Cottage Cheese"
         CottagePie = 41, "Cottage Pie"
         CowMilk = 42, "Cow's Milk"
-        Cucumber = 43, 
+        Cucumber = 43
         DairyFreeCheese = 44, "Dairy-free Cheese"
         DairyFreeIceCream = 45, "Dairy-free Ice-cream"
         DarkChocolate = 46, "Dark Chocolate"
-        Doughnuts = 47, 
-        Eggs = 48,
+        Doughnuts = 47
+        Eggs = 48
         FrenchFries = 49, "French Fries"
         FruitCake = 50, "Fruit Cake"
         FruitSmoothies = 51, "Fruit Smoothies"
         GardenPeas = 52, "Garden Peas"
         GoatCheese = 53, "Goat's Cheese"
-        Granola = 54,
-        Grapes = 55, 
+        Granola = 54
+        Grapes = 55
         HaddockRisotto = 56, "Haddock Risotto"
         HalloumiCheese = 57, "Halloumi Cheese"
         IceCream = 58, "Ice-cream"
-        Kiwis = 59, 
+        Kiwis = 59
         LambLeg = 60, "Lamb (leg)"
         LambBurgers = 61, "Lamb Burgers"
         LambCasserole = 62, "Lamb Casserole"
         LambCurry = 63, "Lamb Curry"
         LambMoussaka = 64, "Lamb Moussaka"
         LasagneSheets = 65, "Lasagne Sheets"
-        Lemons = 66,
-        Lentils = 67, 
-        Lettuce = 68, 
-        Macaroni = 69, 
-        Mackerel = 70, 
+        Lemons = 66
+        Lentils = 67
+        Lettuce = 68
+        Macaroni = 69
+        Mackerel = 70
         MeatPizza = 71, "Meat Pizza"
         MeatFreBurger = 72, "Meat-free Burger"
         MeatFreeMince = 73, "Meat-free Mince"
         MeatFreeNuggets = 74, "Meat-free Nuggets"
         MeatFreeSausages = 75, "Meat-free Sausages"
-        Melon = 76, 
+        Melon = 76
         MilkChocolate = 77, "Milk Chocolate"
         MixedSalad = 78, "Mixed Salad"
-        Muesli = 79, 
-        Muffins = 80, 
-        Mushrooms = 81, 
-        Naan = 82, 
-        NutLoaf = 83, 
-        Onions = 84, 
+        Muesli = 79
+        Muffins = 80
+        Mushrooms = 81
+        Naan = 82
+        NutLoaf = 83
+        Onions = 84
         OrangeJuice = 85, "Orange Juice"
-        Oranges = 86, 
-        Pancakes = 87, 
-        Pasta = 88, 
+        Oranges = 86
+        Pancakes = 87
+        Pasta = 88
         PeanutButter = 89, "Peanut Butter"
-        Peanuts = 90,
-        Pears = 91, 
-        Pineapple = 92, 
-        Popcorn = 93, 
+        Peanuts = 90
+        Pears = 91
+        Pineapple = 92
+        Popcorn = 93
         PorridgeOatmeal = 94, "Porridge (oatmeal)"
-        Potatoes = 95, 
-        Prawns = 96,
+        Potatoes = 95
+        Prawns = 96
         ProteinBar = 97, "Protein Bar"
         PumpkinSeeds = 98, "Pumpkin Seeds"
-        Raspberries = 99, 
-        Rice = 100, 
-        Salmon = 101, 
+        Raspberries = 99
+        Rice = 100
+        Salmon = 101
         SausageRolls = 102, "Sausage Rolls"
         SoyDesert = 103, "Soy Desert"
         SoyMilk = 104, "Soy Milk"
-        Spaghetti = 105, 
-        Spinach = 106, 
+        Spaghetti = 105
+        Spinach = 106
         SpongeCake = 107, "Sponge Cake"
-        Strawberries = 108,
-        Sweetcorn = 109, 
-        Tea = 110, 
-        Tofu = 111,
-        Tomatoes = 112,
+        Strawberries = 108
+        Sweetcorn = 109
+        Tea = 110
+        Tofu = 111
+        Tomatoes = 112
         TortillaWraps = 113, "Tortilla Wraps"
         VegPizza = 114, "Vegan Pizza"
         VegetableLasagne = 115, "Vegetable Lasagne"
         VegCurry = 116, "Vegetarian Curry"
-        Walnuts = 117, 
-        Watermelon = 118, 
-        Wine = 119, 
+        Walnuts = 117
+        Watermelon = 118
+        Wine = 119
         Yoghurt = 120
     
     class Internet(models.IntegerChoices):
         # Internet
-        WebsitePage = 1,
-        Email = 2,
-        DataStored = 3,
-        GoogleSearch = 4,
-        Netflix = 5,
-        Youtube = 6,
-        TextMessage = 7,
-        Tweet = 8,
-        TikTok = 9,
-        Reddit = 10,
-        Pinterest = 11,
-        Instagram = 12,
-        Snapchat = 13,
-        Linkedin = 14,
-        Facebook = 15,
+        WebsitePage = 1
+        Email = 2
+        DataStored = 3
+        GoogleSearch = 4
+        Netflix = 5
+        Youtube = 6
+        TextMessage = 7
+        Tweet = 8
+        TikTok = 9
+        Reddit = 10
+        Pinterest = 11
+        Instagram = 12
+        Snapchat = 13
+        Linkedin = 14
+        Facebook = 15
         PhoneCall = 16
         
     class Travel(models.IntegerChoices):
         # Travel
-        DomesticFlight = 1,
-        DieselCar = 2,
-        PetrolCar = 3,
-        ShortHaulFlight = 4,
-        LongHaulFlight = 5,
-        Motorbike = 7,
-        Bus = 8,
-        ElectricCar = 9,
+        DomesticFlight = 1, "Domestic Flight"
+        DieselCar = 2, "Diesel Car"
+        PetrolCar = 3, "Petrol Car"
+        ShortHaulFlight = 4, "Short-haul Flight"
+        LongHaulFlight = 5, "Long-haul Flight"
+        Motorbike = 7
+        Bus = 8
+        ElectricCar = 9, "Electric Car"
         Rail = 10
 
     
@@ -243,9 +243,19 @@ class Footprints(models.Model):
     def get_total_carbon_footprint_for_user(user):
         return Footprints.objects.filter(user=user).aggregate(models.Sum('carbon_footprint'))['carbon_footprint__sum']
     
+    def get_type_display(self):
+        if self.activity == self.Activities.Electricity:
+            return(self.Electricity(self.type).label)
+        if self.activity == self.Activities.Food:
+            return (self.Food(self.type).label)
+        if self.activity == self.Activities.Internet:
+            return (self.Internet(self.type).label)
+        if self.activity == self.Activities.Travel:
+            return (self.Travel(self.type).label)
+
     def calculate_carbon_footprint(self):
         
-        carbon_footprint = self.emissionFactor[self.activity][self.type]*self.parameter
+        carbon_footprint = self.emissionFactor[self.get_activity_display][self.get_type_display]*self.parameter
         
         return carbon_footprint
 
