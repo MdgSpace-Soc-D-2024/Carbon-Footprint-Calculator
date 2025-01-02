@@ -1,91 +1,114 @@
-from django.shortcuts import render, HttpResponse, redirect
+from rest_framework import status, viewsets, views, permissions, response, decorators
 
-from django.contrib.auth import authenticate, login as auth_login, get_user_model
-from django.contrib import messages
+from django.contrib.auth import authenticate
+from django.contrib.auth import get_user_model
 
-from login import models, forms
+from rest_framework_simplejwt import tokens
+
+from login import models, serializers, permissions as login_permissions
+
+from django.views.decorators.csrf import csrf_exempt
 
 User = get_user_model()
 
-def login(request):
+class CustomUserViewSet(viewsets.ModelViewSet):
+    queryset = models.CustomUser.objects.all()
+    serializer_class = serializers.CustomUserSerializer
 
-    if request.method == 'POST':
+    permission_classes = [permissions.IsAuthenticated, login_permissions.IsOwnUserOrReadOnly]
 
-        try:
-
-            form = forms.LoginForm(request.POST)
-
-            if form.is_valid():
-                
-                user = authenticate(username = form.cleaned_data['username'], password = form.cleaned_data['password'])
-                
-                if user is not None:
-                    auth_login(request, user)
-                    return redirect('trying_it_out')
-                else:
-                    messages.error(request, "Invalid username or password!")
-                    return redirect('login')
-                
-            else:
-                messages.error(request, "Please correct the credentials!")
-                return redirect('login')
+    @decorators.action(detail=False, methods=['put'])
+    def update_profile(self, request):
+        user = request.user
+        serializer = self.get_serializer(user, data=request.data, partial=True)
         
-        except Exception as e:
-            messages.error(request, f"An unexpected error occurred: {e}")
-            return redirect('login')
+        if serializer.is_valid():
+            serializer.save()
+            return response.Response(serializer.data)
+        return response.Response(serializer.errors, status=400)
 
-    form = forms.LoginForm()
 
-    return render(request, 'login/login.html', {'form': form})
+# Helper function to generate JWT tokens for a user
+def get_tokens_for_user(user):
+    refresh = tokens.RefreshToken.for_user(user)
+    return {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }
 
-def register(request):
+class LoginView(views.APIView):
     
-    if request.method == 'POST':
+    # Handles user login
 
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+
+        if request.user.is_authenticated:
+            return response.Response({'message': 'User is already logged in!'}, status = status.HTTP_400_BAD_REQUEST)
+        
+        serializer = serializers.LoginSerializer(data = request.data)
+        serializer.is_valid(raise_exception = True)
+
+        username = serializer.validated_data['username']
+        password = serializer.validated_data['password']
+
+        user = authenticate(username = username, password = password)
+        
+        if user is None:
+            return response.Response({'error': 'Invalid credentials'}, status = status.HTTP_401_UNAUTHORIZED)
+
+        tokens = get_tokens_for_user(user)
+        
+        return response.Response(tokens, status = status.HTTP_200_OK)
+
+class RegisterView(views.APIView):
+
+    # Handles user registration
+
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        
+        if request.user.is_authenticated:
+            return response.Response({'message': 'User is already logged in!'}, status = status.HTTP_400_BAD_REQUEST)
+        
+        serializer = serializers.RegisterSerializer(data = request.data)
+
+        if serializer.is_valid():
+            # username = serializer.validated_data.get('username')
+            # password = request.data.get('password')
+
+            # if models.CustomUser.objects.filter(username = username).exists():
+            #     return response.Response({'error': 'Username already exists!'}, status = status.HTTP_400_BAD_REQUEST)
+
+            user = serializer.save()
+
+            return response.Response({'message': f'Welcome, {user.username}! Registration with Carbon Footprint Calculator was successful!'}, status = status.HTTP_201_CREATED)
+        
+        else:
+            return response.Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+
+class LogoutView(views.APIView):
+
+    # Handles user logout
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        
         try:
-
-            form = forms.RegisterForm(request.POST)
-
-            if form.is_valid():
-
-                username = form.cleaned_data['username']
-                password = form.cleaned_data['password']
-
-                if not username or not password:
-                    messages.error(request, "Username or password cannot be empty!")
-                    return redirect('register')
-                
-                if models.CustomUser.objects.filter(username = username).exists():
-                    messages.error(request, "Username already exists.")
-                    return redirect('register')
-
-                user = form.save(commit = False)
-                user.set_password(password)
-                user.save()
-
-                messages.success(request, "Registration with Carbon Footprint Calculator was successful!")
-                return redirect('trying_it_out')
             
-            else:
-                messages.error(request, "Please check the errors in the form!")
-                return redirect('register')
+            # Get the refresh token from the request (fromtend handles it)
+            refresh_token = request.data.get("refresh_token")
+            if not refresh_token:
+                return response.Response({'error': 'Refresh token is required!'}, status = status.HTTP_400_BAD_REQUEST)
+            
+            # Blacklist the token
+            token = tokens.RefreshToken(refresh_token)
+            token.blacklist()
+
+            return response.Response({'message': 'Successfully logged out!'}, status = status.HTTP_200_OK)
         
         except Exception as e:
-            messages.error(request, f"An unexpected error occurred: {e}")
-            return redirect('register')
-    
-    form = forms.RegisterForm()
-
-    return render(request, 'login/register.html', {'form': form})
-
-def trying_it_out(request):
-    return HttpResponse("Hello!")
-
-
-def logout(request):
-#    if request.user.is_authenticated:
-#        request.user.auth_token.delete()
-#        request.user.delete()
-#        return HttpResponse(f"We're sorry to see you go! Goodbye, {request.user.username}!")
-
-    return HttpResponse("You have been logged out!")
+            return response.Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

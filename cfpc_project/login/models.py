@@ -30,15 +30,15 @@ professions = [(1, 'Student'), (2, 'Educator (Teacher/Professor)'), (3, 'Enginee
 purpose = [(1, 'Personal'), (2, 'Research/Academic Purposes'), (3, 'Business/Commercial'), (4, 'Other')]
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(max_length = 50, unique = True)
+    username = models.CharField(max_length = 50, unique = True, primary_key = True)
     # password = models.CharField(max_length = 200)
     # already in AbstractBaseUser class
     
-    name = models.CharField(max_length = 100, default = 'Anonymous', help_text = 'Enter your full name')
-    age = models.IntegerField(null = True, help_text = 'Enter your age')
+    name = models.CharField(max_length = 100, default = 'Anonymous')
+    age = models.IntegerField(null = True)
     
-    profession = models.IntegerField(choices = professions, default = 9, help_text = 'Select your profession')
-    purpose_of_joining = models.IntegerField(choices = purpose, default = 4, help_text = 'Select your reason for signing up here')
+    profession = models.IntegerField(choices = professions, default = 9)
+    purpose_of_joining = models.IntegerField(choices = purpose, default = 4)
 
     date_joined = models.DateTimeField(default = timezone.now)
     
@@ -56,3 +56,16 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+    
+    # @property
+    # def is_authenticated(self):
+    #     # Return True if the user is not anonymous
+    #     return self.is_active
+
+    # def check_password(self, raw_password):
+    #     return super().check_password(raw_password)
+
+    # def set_password(self, raw_password):
+    #     self.password = make_password(raw_password)
+    
+    # already in the AbstractBaseUser class
