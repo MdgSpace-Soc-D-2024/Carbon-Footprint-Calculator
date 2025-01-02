@@ -16,10 +16,11 @@ Including another URLconf
 """
 from django.urls import path
 from footprintdata import views
+from django.views.decorators.csrf import csrf_exempt
 
 urlpatterns = [
-    path('insertdata/', views.insertdata, name = 'insertdata'),
-    path('viewdata/', views.viewdata, name = 'viewdata'),
-    path('sharedata/', views.sharedata, name = 'sharedata'),
-    path('viewshareddata/', views.viewshareddata, name = 'viewshareddata')
+    path('insertdata/', csrf_exempt(views.InsertDataView.as_view()), name = 'insertdata'),
+    # path('viewdata/', views.viewdata, name = 'viewdata'),
+    # path('sharedata/', views.sharedata, name = 'sharedata'),
+    # path('viewshareddata/', views.viewshareddata, name = 'viewshareddata')
 ]
