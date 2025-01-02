@@ -16,17 +16,26 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework import routers
+from login import views
+
+
+# Routers provide an easy way of automatically determining the URL conf.
+router = routers.DefaultRouter()
+router.register(r'users', views.CustomUserViewSet)
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     
-    path('', include('login.urls')),
-    path('register/', include('login.urls')),
-    path('trying_it_out/', include('login.urls')),
-    path('logout/', include('login.urls')),
-
+    # App-specific endpoints
+    path('login/', include('login.urls')),
     path('home/', include('home.urls')),
-
     path('footprintdata/', include('footprintdata.urls')),
 
+    # Default router endpoints
+    path('', include(router.urls)),
+
+    # Browsable API login/logout
+    path('api-auth/', include('rest_framework.urls', namespace = 'rest_framework')),
 ]

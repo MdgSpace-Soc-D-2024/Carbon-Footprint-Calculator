@@ -1,3 +1,7 @@
 mysqlclient
 Django
-dotenv
+python-dotenv
+djangorestframework
+drf-spectacular
+djangorestframework-simplejwt
+djoser
