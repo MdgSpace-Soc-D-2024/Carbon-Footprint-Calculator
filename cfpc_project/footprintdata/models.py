@@ -7,11 +7,16 @@ import json
 from login import models as login_models
 
 def readData(filename):
-    with open(filename) as f:
-        data = json.load(f)
-    return data
+    try:
+        with open(filename) as f:
+            data = json.load(f)
+        return data
+    except FileNotFoundError:
+        raise exceptions.ValidationError(f"{filename} not found.")
+    except json.JSONDecodeError:
+        raise exceptions.ValidationError(f"Error parsing {filename}.")
 
-data = readData('footprintdata/data.json')
+data = readData('data.json')
 
 # The carbon absorption coefficient per tree was derived through two main methods: 
 # 1) Reference to literature specifying carbon sequestration and 
@@ -33,7 +38,7 @@ class Footprints(models.Model):
     user = models.ForeignKey(login_models.CustomUser, on_delete = models.CASCADE)
     time_of_entry = models.DateTimeField(default = timezone.now)
     activity = models.IntegerField(choices = [(key, value) for key, value in data['Activities'].items()])
-    type = models.IntegerField() # depends on the activity chosen
+    type_ = models.IntegerField() # depends on the activity chosen
     parameter = models.IntegerField() # depends on the type chosen
     emission_factor = models.FloatField(null = True)
     carbon_footprint = models.FloatField(null = True)
@@ -41,16 +46,15 @@ class Footprints(models.Model):
 
     def __str__(self):
         return f"{self.user} : {self.get_activity_display()} on {self.time_of_entry}"
-    
-    @staticmethod
-    def get_total_carbon_footprint_for_user(user):
-        return Footprints.objects.filter(user = user).aggregate(models.Sum('carbon_footprint'))['carbon_footprint__sum'] # value in the dictionary returned by Django aggregation methods
-    
+
     def calculate_carbon_footprint(self):
 
         try:
     
-            self.emission_factor = data['EmissionFactors'].get(str(self.activity), {}).get(str(self.type), None)
+            self.emission_factor = data['EmissionFactors'].get(str(self.activity), {}).get(str(self.type_), None)
+
+            if self.emission_factor is None:
+                raise exceptions.ValidationError(f"No emission factor found for activity {self.activity} and type {self.type_}.")
             
             carbon_footprint = self.emission_factor*self.parameter
             
@@ -60,6 +64,9 @@ class Footprints(models.Model):
             raise exceptions.ValidationError(f'Error: {str(e)}')
 
     def calculate_number_of_trees(self):
+
+        if not self.carbon_footprint:
+            self.carbon_footprint = self.calculate_carbon_footprint()
 
         return self.carbon_footprint*TREE_CARBON_OFFSET
 

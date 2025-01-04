@@ -20,7 +20,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 urlpatterns = [
     path('insertdata/', csrf_exempt(views.InsertDataView.as_view()), name = 'insertdata'),
-    # path('viewdata/', views.viewdata, name = 'viewdata'),
+    path('viewdata/', csrf_exempt(views.ViewDataView.as_view()), name = 'viewdata'),
     # path('sharedata/', views.sharedata, name = 'sharedata'),
     # path('viewshareddata/', views.viewshareddata, name = 'viewshareddata')
 ]
