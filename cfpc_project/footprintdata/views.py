@@ -10,71 +10,77 @@ class InsertDataView(views.APIView):
     def post(self, request, *args, **kwargs):
         
         activity = request.data.get('activity')
-        type_ = request.data.get('type_')
+        type_of_activity = request.data.get('type_of_activity')
         parameter = request.data.get('parameter')
-
+        
         if not activity:
             return response.Response(
                 {"detail": "Activity is required!"},
                 status = status.HTTP_400_BAD_REQUEST
             )
 
-        if activity and not type_:
+        else:
 
-            # Step 1: User selects activity, and we return possible types for that activity.
+            if not type_of_activity:
 
-            serializer = serializers.ActivityTypeSerializer(data = request.data)
+                # Step 1: User selects activity, and we return possible types for that activity.
+
+                serializer = serializers.ActivityTypeSerializer(data = request.data)
+                
+                if serializer.is_valid():
+
+                    activity = request.data.get('activity')
+
+                    types = list(models.data.get('Types').get(str(activity), {}).items())
+
+                    return response.Response({
+                        "activity": activity,
+                        "types": types,
+                        "message": "Select a type."
+                    }, status = status.HTTP_200_OK)
+                
+                return response.Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
             
-            if serializer.is_valid():
+            else:
 
-                activity = serializer.validated_data['activity']
+                if not parameter:
 
-                types = list(models.data['Types'].get(str(activity), {}).items())
+                    # Step 2: User selects activity and type, and we ask for the parameter.
 
-                return response.Response({
-                    "activity": activity,
-                    "types": types,
-                    "message": "Select a type and provide a parameter."
-                }, status = status.HTTP_200_OK)
-            
-            return response.Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
-        
-        elif activity and type_ and not parameter:
+                    serializer = serializers.TypeParameterSerializer(data = request.data)
 
-            # Step 2: User selects activity and type, and we ask for the parameter.
+                    if serializer.is_valid():
 
-            serializer = serializers.TypeParameterSerializer(data = request.data)
+                        activity = request.data.get('activity')
+                        type_of_activity = request.data.get('type_of_activity')
+                        parameters = str(models.data.get('Parameters').get(str(activity), {}).get(str(type_of_activity), None))
 
-            if serializer.is_valid():
+                        return response.Response({
+                            "activity": activity,
+                            "type_of_activity": type_of_activity,
+                            "parameters": parameters,
+                            "message": "Provide a parameter."
+                        }, status = status.HTTP_200_OK)
+                    
+                    return response.Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+                
+                else:
 
-                activity = serializer.validated_data['activity']
-                type_ = serializer.validated_data['type_']
-                parameter = str(models.data['parameters'].get(str(activity), {}).get(str(type_), None))
+                    # Step 3: After selecting activity and type, user provides the parameter and calculates carbon footprint.
+                    
+                    serializer = serializers.FootprintsSerializer(data = request.data, context = {'request': request})
 
-                return response.Response({
-                    "activity": activity,
-                    "type": type_,
-                    "parameter": parameter,
-                    "message": "Provide a parameter."
-                }, status = status.HTTP_200_OK)
-            
-            return response.Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
-        
-        elif activity and type_ and parameter:
+                    if serializer.is_valid():
+                        
+                        footprint = serializer.save()
+                        
+                        return response.Response({
+                            "message": "Carbon footprint calculated and saved successfully.",
+                            "carbon_footprint": footprint.carbon_footprint,
+                            "number_of_trees": footprint.number_of_trees
+                        }, status = status.HTTP_201_CREATED)
 
-            # Step 3: After selecting activity and type, user provides the parameter and calculates carbon footprint.
-            
-            serializer = serializers.FootprintsSerializer(data = request.data)
-
-            if serializer.is_valid():
-                footprint = serializer.save(user = request.user)
-                return response.Response({
-                    "message": "Carbon footprint calculated and saved successfully.",
-                    "carbon_footprint": footprint.carbon_footprint,
-                    "number_of_trees": footprint.number_of_trees
-                }, status = status.HTTP_201_CREATED)
-
-            return response.Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+                    return response.Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
 
         
 class ViewDataView(views.APIView):

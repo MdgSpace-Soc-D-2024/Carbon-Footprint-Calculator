@@ -16,7 +16,9 @@ class ActivityTypeSerializer(serializers.Serializer):
 
         activity = data1['activity']
 
-        if activity not in [int(i) for i in data['Activities'].values()]:
+        permissible_activities = list(int(i) for i in list(data.get('Activities').values()))
+
+        if activity not in permissible_activities:
             raise serializers.ValidationError("Invalid activity selected!")
         
         return activity
@@ -25,34 +27,41 @@ class ActivityTypeSerializer(serializers.Serializer):
         
         activity = self.validated_data.get('activity')
         
-        types = list(data['Types'].get(str(activity), {}).items())
+        types = list(data.get('Types').get(str(activity), {}).items())
         
         return {'types': types}
     
 class TypeParameterSerializer(serializers.Serializer):
 
     activity = serializers.IntegerField()
-    type_ = serializers.IntegerField()
+    type_of_activity = serializers.IntegerField()
 
     def validate(self, data1):
 
         activity = data1['activity']
-        type_ = data1['type_']
+        type_of_activity = data1['type_of_activity']
+
+        permissible_activities = list(int(i) for i in list(data.get('Activities').values()))
         
-        if activity not in [int(i) for i in data['Activities'].values()]:
+        
+        if activity not in permissible_activities:
             raise serializers.ValidationError("Invalid activity selected!")
         
-        if type_ not in [int(i) for i in data['Types'].values()]:
-            raise serializers.ValidationError("Invalid type selected!")
+        else:
+
+            permissible_types = list(int(i) for i in list(data.get('Types').get(str(activity)).values()))
         
-        return activity, type_
+            if type_of_activity not in permissible_types:
+                raise serializers.ValidationError("Invalid type selected!")
+        
+        return activity, type_of_activity
     
     def to_representation(self, instance):
         
         activity = self.validated_data.get('activity')
-        type_ = self.validated_data.get('type_')
+        type_of_activity = self.validated_data.get('type_of_activity')
         
-        parameter = data['parameters'].get(str(activity), {}).get(str(type_), None)
+        parameter = data['parameters'].get(str(activity), {}).get(str(type_of_activity), None)
         
         return {'parameter': parameter}
 
@@ -61,18 +70,18 @@ class FootprintsSerializer(serializers.ModelSerializer):
     class Meta:
 
         model = footprintdata_models.Footprints
-        fields = ['user', 'activity', 'type_', 'parameter']
+        fields = ['user', 'activity', 'type_of_activity', 'parameter']
 
     def validate(self, data1):
 
         activity = data1['activity']
-        type_ = data1['type_']
+        type_of_activity = data1['type_of_activity']
         parameter = data1['parameter']
 
         if str(activity) not in data['EmissionFactors']:
             raise serializers.ValidationError("Invalid emission factor for the selected activity.")
         
-        if str(type_) not in data['EmissionFactors'][str(activity)]:
+        if str(type_of_activity) not in data['EmissionFactors'][str(activity)]:
             raise serializers.ValidationError("Invalid emission factor for the selected type.")
         
         # make the parameter ranges in the json file, and check if the parameter is within the range to validate.
@@ -83,12 +92,21 @@ class FootprintsSerializer(serializers.ModelSerializer):
         
 
     def create(self, validated_data):
+
+        validated_data['user'] = self.context['request'].user
+
+        validated_data['activity'] = int(validated_data['activity'])
+        validated_data['type_of_activity'] = int(validated_data['type_of_activity'])
+        validated_data['parameter'] = float(validated_data['parameter'])
         
         footprint = footprintdata_models.Footprints(**validated_data)
         
         footprint.save()
         
         return footprint
+    
+    def to_representation(self, instance):
+        return super().to_representation(instance)
 
 # Serialisers for viewing data
 
@@ -121,7 +139,7 @@ class FootprintsViewSerializer(serializers.ModelSerializer):
 
 
             return {
-                "entries": list(footprints.values('time_of_entry', 'activity', 'type_', 'parameter', 'carbon_footprint', 'number_of_trees'))
+                "entries": list(footprints.values('time_of_entry', 'activity', 'type_of_activity', 'parameter', 'carbon_footprint', 'number_of_trees'))
                 # manipulation of data will be done by frontend (statistics and graphs)
             }
     

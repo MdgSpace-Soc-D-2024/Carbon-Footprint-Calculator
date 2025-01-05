@@ -1,13 +1,15 @@
 from rest_framework import status, viewsets, views, permissions, response, decorators
 
-from django.contrib.auth import authenticate
-from django.contrib.auth import get_user_model
+from django.contrib.auth import authenticate, get_user_model
 
 from rest_framework_simplejwt import tokens
+from rest_framework_simplejwt.settings import api_settings
 
 from login import models, serializers, permissions as login_permissions
 
-from django.views.decorators.csrf import csrf_exempt
+import datetime
+
+from django.conf import settings
 
 User = get_user_model()
 
@@ -30,11 +32,17 @@ class CustomUserViewSet(viewsets.ModelViewSet):
 
 # Helper function to generate JWT tokens for a user
 def get_tokens_for_user(user):
+    if not hasattr(user, 'username'):
+        raise AttributeError("CustomUser object does not have 'username' attribute")
+    
     refresh = tokens.RefreshToken.for_user(user)
+    
+    # The access token can be accessed from the refresh token
     return {
-        'refresh': str(refresh),
         'access': str(refresh.access_token),
+        'refresh': str(refresh),
     }
+
 
 class LoginView(views.APIView):
     
@@ -45,7 +53,7 @@ class LoginView(views.APIView):
     def post(self, request):
 
         if request.user.is_authenticated:
-            return response.Response({'message': 'User is already logged in!'}, status = status.HTTP_400_BAD_REQUEST)
+            return response.Response({'message': 'User is already logged in!'}, status = status.HTTP_409_CONFLICT)
         
         serializer = serializers.LoginSerializer(data = request.data)
         serializer.is_valid(raise_exception = True)
@@ -53,7 +61,7 @@ class LoginView(views.APIView):
         username = serializer.validated_data['username']
         password = serializer.validated_data['password']
 
-        user = authenticate(username = username, password = password)
+        user = authenticate(username = username, password = password) # calls the check_password() method and takes care of hashing therein!
         
         if user is None:
             return response.Response({'error': 'Invalid credentials'}, status = status.HTTP_401_UNAUTHORIZED)
@@ -71,23 +79,17 @@ class RegisterView(views.APIView):
     def post(self, request):
         
         if request.user.is_authenticated:
-            return response.Response({'message': 'User is already logged in!'}, status = status.HTTP_400_BAD_REQUEST)
+            return response.Response({'message': 'User is already logged in!'}, status = status.HTTP_409_CONFLICT)
         
         serializer = serializers.RegisterSerializer(data = request.data)
 
-        if serializer.is_valid():
-            # username = serializer.validated_data.get('username')
-            # password = request.data.get('password')
+        serializer.is_valid(raise_exception = True)
 
-            # if models.CustomUser.objects.filter(username = username).exists():
-            #     return response.Response({'error': 'Username already exists!'}, status = status.HTTP_400_BAD_REQUEST)
+        user = serializer.save()
 
-            user = serializer.save()
-
-            return response.Response({'message': f'Welcome, {user.username}! Registration with Carbon Footprint Calculator was successful!'}, status = status.HTTP_201_CREATED)
-        
-        else:
-            return response.Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+        return response.Response({'message': f'Welcome, {user.username}! Registration with Carbon Footprint Calculator was successful! Login to add your activities!'}, 
+                                 user = serializer.to_representation(),
+                                 status = status.HTTP_201_CREATED)
 
 class LogoutView(views.APIView):
 
@@ -99,7 +101,7 @@ class LogoutView(views.APIView):
         
         try:
             
-            # Get the refresh token from the request (fromtend handles it)
+            # Get the refresh token from the request (frontend handles it)
             refresh_token = request.data.get("refresh_token")
             if not refresh_token:
                 return response.Response({'error': 'Refresh token is required!'}, status = status.HTTP_400_BAD_REQUEST)

@@ -5,3 +5,5 @@ djangorestframework
 drf-spectacular
 djangorestframework-simplejwt
 djoser
+json
+regex

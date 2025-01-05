@@ -6,6 +6,10 @@ import json
 
 from login import models as login_models
 
+import os
+
+base_dir = os.path.dirname(__file__)
+
 def readData(filename):
     try:
         with open(filename) as f:
@@ -15,8 +19,10 @@ def readData(filename):
         raise exceptions.ValidationError(f"{filename} not found.")
     except json.JSONDecodeError:
         raise exceptions.ValidationError(f"Error parsing {filename}.")
+    
+filename = os.path.join(base_dir, 'data.json')
 
-data = readData('data.json')
+data = readData(filename)
 
 # The carbon absorption coefficient per tree was derived through two main methods: 
 # 1) Reference to literature specifying carbon sequestration and 
@@ -38,8 +44,8 @@ class Footprints(models.Model):
     user = models.ForeignKey(login_models.CustomUser, on_delete = models.CASCADE)
     time_of_entry = models.DateTimeField(default = timezone.now)
     activity = models.IntegerField(choices = [(key, value) for key, value in data['Activities'].items()])
-    type_ = models.IntegerField() # depends on the activity chosen
-    parameter = models.IntegerField() # depends on the type chosen
+    type_of_activity = models.IntegerField() # depends on the activity chosen
+    parameter = models.FloatField() # depends on the type chosen
     emission_factor = models.FloatField(null = True)
     carbon_footprint = models.FloatField(null = True)
     number_of_trees = models.FloatField(null = True)
@@ -51,10 +57,10 @@ class Footprints(models.Model):
 
         try:
     
-            self.emission_factor = data['EmissionFactors'].get(str(self.activity), {}).get(str(self.type_), None)
+            self.emission_factor = data['EmissionFactors'].get(str(self.activity), {}).get(str(self.type_of_activity), None)
 
             if self.emission_factor is None:
-                raise exceptions.ValidationError(f"No emission factor found for activity {self.activity} and type {self.type_}.")
+                raise exceptions.ValidationError(f"No emission factor found for activity {self.activity} and type {self.type_of_activity}.")
             
             carbon_footprint = self.emission_factor*self.parameter
             
