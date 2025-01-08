@@ -18,9 +18,13 @@ from django.urls import path
 from footprintdata import views
 from django.views.decorators.csrf import csrf_exempt
 
+from django.urls import path
+from footprintdata import views
+from django.views.decorators.csrf import csrf_exempt
+
 urlpatterns = [
     path('insertdata/', csrf_exempt(views.InsertDataView.as_view()), name = 'insertdata'),
     path('viewdata/', csrf_exempt(views.ViewDataView.as_view()), name = 'viewdata'),
-    # path('sharedata/', views.sharedata, name = 'sharedata'),
+    path('sharedata/', csrf_exempt(views.ShareDataView.as_view()), name = 'sharedata'),
     # path('viewshareddata/', views.viewshareddata, name = 'viewshareddata')
 ]

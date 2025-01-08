@@ -72,7 +72,7 @@ class InsertDataView(views.APIView):
 
                     if serializer.is_valid():
                         
-                        footprint = serializer.save()
+                        footprint = serializer.save(validated_data = request.data)
                         
                         return response.Response({
                             "message": "Carbon footprint calculated and saved successfully.",
@@ -89,15 +89,15 @@ class ViewDataView(views.APIView):
     
     def get(self, request, *args, **kwargs):
 
-        user = request.query_params.get('user')
+        user = request.user
         activity = request.query_params.get('activity')
         time_start = request.query_params.get('time_start')
         time_end = request.query_params.get('time_end')
 
         if not all([user, activity, time_start, time_end]):
             return response.Response(
-                {"detail": "Missing required parameters: user, activity, time_start, and time_end."},
-                status=status.HTTP_400_BAD_REQUEST
+                {"detail": "Missing required parameters!"},
+                status = status.HTTP_400_BAD_REQUEST
             ) 
         # later may change this to showing all entries related to the inputs only, i.e. not making it mandatory to provide all.
 
@@ -115,3 +115,37 @@ class ViewDataView(views.APIView):
             return response.Response(data, status = status.HTTP_200_OK)
         
         return response.Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+    
+class ShareDataView(views.APIView):
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+
+        sender = request.user
+        receiver_username = request.query_params.get('receiver_username') # username
+        activity = request.query_params.get('activity')
+        time_start = request.query_params.get('time_start')
+        time_end = request.query_params.get('time_end')
+        message = request.query_params.get('message')
+
+        if not all([sender, receiver_username, activity, time_start, time_end]):
+            return response.Response({'detail': "Missing required parameters!"}, status = status.HTTP_400_BAD_REQUEST)
+        
+        serializer_data = {
+            'sender': sender,
+            'receiver_username': receiver_username,
+            'activity': activity,
+            'time_start': time_start,
+            'time_end': time_end
+        } 
+        
+        serializer = serializers.FootprintShareSerializer(data = serializer_data)
+
+        serializer.is_valid(raise_exception = True)
+
+        serializer.save()
+
+        data = serializer.get_data(serializer.validated_data)
+
+        return response.Response(data = data, status = status.HTTP_200_OK)

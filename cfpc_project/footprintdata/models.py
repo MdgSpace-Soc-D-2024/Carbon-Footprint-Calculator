@@ -72,7 +72,7 @@ class Footprints(models.Model):
     def calculate_number_of_trees(self):
 
         if not self.carbon_footprint:
-            self.carbon_footprint = self.calculate_carbon_footprint()
+            self.carbon_footprint = self.calculate_carbon_footprint() 
 
         return self.carbon_footprint*TREE_CARBON_OFFSET
 
@@ -81,4 +81,19 @@ class Footprints(models.Model):
         self.number_of_trees = self.calculate_number_of_trees()
         super().save(*args, **kwargs)
 
-    
+
+class SharingModel(models.Model):
+
+    default_message = "Hi, Carbon Footprint Calculator User! I recently recorded a activity and took a step to learning how much my actions mean to the planet. Have a look at it and show your appreciation! Hope we continue using Carbon Footprint Calculator and make our lives better!"
+
+    sender = models.ForeignKey(login_models.CustomUser, on_delete = models.CASCADE)
+    receiver =  models.ForeignKey(login_models.CustomUser, on_delete = models.CASCADE)
+    activity_id = models.ForeignKey(Footprints, on_delete = models.CASCADE)
+    time_of_sharing = models.DateTimeField(default = timezone.now)
+    message = models.CharField(default = default_message, max_length = 500)
+
+    def __str__(self):
+        return f"{self.sender} shared {self.activity_id} with {self.receiver} on {self.time_of_sharing}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
