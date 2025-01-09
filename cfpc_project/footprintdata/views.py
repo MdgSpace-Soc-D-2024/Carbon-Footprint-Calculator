@@ -1,6 +1,4 @@
 from rest_framework import status, response, views, permissions
-
-from rest_framework import status
 from footprintdata import serializers, models
 
 class InsertDataView(views.APIView):
@@ -141,6 +139,24 @@ class ShareDataView(views.APIView):
         } 
         
         serializer = serializers.FootprintShareSerializer(data = serializer_data)
+
+        serializer.is_valid(raise_exception = True)
+
+        serializer.save()
+
+        data = serializer.get_data(serializer.validated_data)
+
+        return response.Response(data = data, status = status.HTTP_200_OK)
+    
+class ViewSharedDataView(views.APIView):
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+
+        receiver = request.user
+
+        serializer = serializers.FootprintsViewSharedSerializer(context = {'receiver': receiver})
 
         serializer.is_valid(raise_exception = True)
 

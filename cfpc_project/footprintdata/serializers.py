@@ -237,7 +237,7 @@ class FootprintShareSerializer(serializers.Serializer):
                 sender = sender,
                 receiver = receiver,
                 activity_id = footprint,
-                time_of_sharing = timezone.now,
+                time_of_sharing = timezone.now(),
                 message = message
             )
             sharing_instances.append(sharing_instance)
@@ -247,6 +247,26 @@ class FootprintShareSerializer(serializers.Serializer):
 
         # Return the created data
         return {"detail": f"Successfully shared {len(sharing_instances)} activities."}
+
+    def to_representation(self, instance):
+        return super().to_representation(instance)
+    
+class FootprintsViewSharedSerializer(serializers.Serializer):
+
+    receiver = serializers.PrimaryKeyRelatedField(queryset = login_models.CustomUser.objects.all())
+
+    def validate(self, data):
+        return data
+
+    def get_data(self, validated_data):
+        
+        receiver = validated_data['receiver']
+
+        shareddata = footprintdata_models.SharingModel.objects.select_related('sender', 'activity_id').filter(receiver = receiver)
+
+        shareddata = list(shareddata.values('sender__username', 'time_of_entry', 'activity_id__activity', 'activity_id__carbonfootprint', 'activity_id__time_of_entry', 'message'))
+
+        return shareddata
 
     def to_representation(self, instance):
         return super().to_representation(instance)
