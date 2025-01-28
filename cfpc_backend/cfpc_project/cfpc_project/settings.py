@@ -25,13 +25,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-@%$6n^iq=6@i-vy=udk6=56hhmk)syb+($^2ff7g=pm*p%+zd8'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', ]
+IP_ADD = os.getenv('IP_ADD').split(',') # IP Address of Flutter App
+ALLOWED_HOSTS.extend(IP_ADD)
 
 # Application definition
 
