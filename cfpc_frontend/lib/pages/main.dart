@@ -1,4 +1,17 @@
+// Material App
 import 'package:flutter/material.dart';
+
+// Pages
+import 'package:cfpc_frontend/pages/register.dart';
+import 'package:cfpc_frontend/pages/login.dart';
+import 'package:cfpc_frontend/pages/insertfootprints.dart';
+import 'package:cfpc_frontend/pages/sharefootprints.dart';
+import 'package:cfpc_frontend/pages/viewfootprints.dart';
+import 'package:cfpc_frontend/pages/viewsharedfootprints.dart';
+
+// API
+import 'package:cfpc_frontend/constants/api.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -20,163 +33,12 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const LoginPage(),
+        'register': (context) => const RegisterPage(),
         'home': (context) =>
             const MyHomePage(title: 'CARBON FOOTPRINT CALCULATOR'),
         'logout': (context) => const LogoutPage(),
       },
     );
-  }
-}
-
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
-
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.black,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Image.asset('./assets/images/logo.png',
-                  height: MediaQuery.of(context).size.height * 0.07,
-                  width: MediaQuery.of(context).size.width * 0.05),
-              SizedBox(width: MediaQuery.of(context).size.width * 0.01),
-              Text('CARBON FOOTPRINT CALCULATOR',
-                  style: TextStyle(
-                      color: Colors.green,
-                      fontWeight: FontWeight.bold,
-                      fontSize: MediaQuery.of(context).size.width * 0.03)),
-            ],
-          ),
-          toolbarHeight: MediaQuery.of(context).size.height * 0.08,
-        ),
-        body: Column(children: [
-          Expanded(
-            child: Container(
-              color: Colors.green,
-              child: Center(
-                child: Column(children: [
-                  Padding(
-                    padding: EdgeInsets.all(
-                        MediaQuery.of(context).size.shortestSide * 0.005),
-                    child: TextField(
-                      controller:
-                          TextEditingController(), // use controller to read the input and send to backend for validation
-                      decoration: InputDecoration(
-                        icon: Icon(
-                          Icons.person,
-                          size: MediaQuery.of(context).size.shortestSide * 0.05,
-                        ),
-                        iconColor: Colors.black,
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Colors.black,
-                              width: MediaQuery.of(context).size.shortestSide *
-                                  0.001),
-                          gapPadding: MediaQuery.of(context).size.height * 0.02,
-                        ),
-                        labelText: 'Username',
-                        labelStyle: TextStyle(
-                          color: Colors.black,
-                          fontSize: MediaQuery.of(context).size.height * 0.05,
-                        ),
-                        // contentPadding:
-                      ),
-                      style: TextStyle(
-                        fontSize: MediaQuery.of(context).size.height * 0.05,
-                        color: Colors.black,
-                      ),
-                      maxLines: 1,
-                      minLines: 1,
-                      cursorColor: Colors.black,
-                      cursorErrorColor: Colors.red,
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(
-                        MediaQuery.of(context).size.shortestSide * 0.005),
-                    child: TextField(
-                      controller: TextEditingController(),
-                      obscureText: true, // can later add view password function
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.black, width: 4)),
-                          icon: Icon(
-                            Icons.password,
-                            size:
-                                MediaQuery.of(context).size.shortestSide * 0.05,
-                          ),
-                          iconColor: Colors.black,
-                          labelText: 'Password',
-                          labelStyle: TextStyle(
-                            color: Colors.black,
-                            fontSize: MediaQuery.of(context).size.height * 0.05,
-                          )),
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: MediaQuery.of(context).size.height * 0.05,
-                      ),
-                      minLines: 1,
-                      maxLines: 1,
-                      cursorColor: Colors.black,
-                      cursorErrorColor: Colors.red,
-                    ),
-                  ),
-                  Padding(
-                      padding: EdgeInsets.all(
-                          MediaQuery.of(context).size.shortestSide * 0.01),
-                      child: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.4,
-                          height: MediaQuery.of(context).size.height * 0.08,
-                          child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const MyHomePage(
-                                          title:
-                                              'CARBON FOOTPRINT CALCULATOR')),
-                                  (Route route) => false,
-                                );
-                              },
-                              child: Text(
-                                'Log me in!',
-                                style: TextStyle(
-                                  color: Colors.green,
-                                  fontSize:
-                                      MediaQuery.of(context).size.height * 0.03,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ))))
-                ]),
-              ),
-            ),
-          ),
-          // Footer
-          Container(
-            color: Colors.black,
-            width: double.infinity,
-            padding: EdgeInsets.only(
-              left: MediaQuery.of(context).size.width * 0.01,
-              right: MediaQuery.of(context).size.width * 0.01,
-              top: MediaQuery.of(context).size.height * 0.01,
-              bottom: MediaQuery.of(context).size.height * 0.01,
-            ),
-            child: Text(
-              'Carbon Footprint Calculator - © 2025 All Rights Reserved',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white, fontSize: 16),
-            ),
-          ),
-        ]));
   }
 }
 
