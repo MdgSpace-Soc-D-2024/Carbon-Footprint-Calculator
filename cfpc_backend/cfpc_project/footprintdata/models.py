@@ -66,7 +66,7 @@ class Footprints(models.Model):
             
             return carbon_footprint
 
-        except Exception as e:
+        except (Exception) as e:
             raise exceptions.ValidationError(f'Error: {str(e)}')
 
     def calculate_number_of_trees(self):
@@ -86,8 +86,8 @@ class SharingModel(models.Model):
 
     default_message = "Hi, Carbon Footprint Calculator User! I recently recorded a activity and took a step to learning how much my actions mean to the planet. Have a look at it and show your appreciation! Hope we continue using Carbon Footprint Calculator and make our lives better!"
 
-    sender = models.ForeignKey(login_models.CustomUser, on_delete = models.CASCADE)
-    receiver =  models.ForeignKey(login_models.CustomUser, on_delete = models.CASCADE)
+    sender = models.ForeignKey(login_models.CustomUser, on_delete = models.CASCADE, related_name = 'sender')
+    receiver =  models.ForeignKey(login_models.CustomUser, on_delete = models.CASCADE, related_name = 'receiver')
     activity_id = models.ForeignKey(Footprints, on_delete = models.CASCADE)
     time_of_sharing = models.DateTimeField(default = timezone.now)
     message = models.CharField(default = default_message, max_length = 500)

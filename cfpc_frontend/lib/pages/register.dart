@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:cfpc_frontend/pages/main.dart';
+
+import 'package:cfpc_frontend/pages/home.dart';
 import 'package:cfpc_frontend/models/register.dart';
 
 import 'package:cfpc_frontend/constants/api.dart';
@@ -46,28 +47,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
-  // void fetchData() async{
-  //   try{
-  //     http.Response response = await http.get(Uri.parse(api));
-  //     var data = response.body; // String
-  //     data = json.decode(response.body); // List
-  //     data.forEach((register){
-  //       Register u = Register(
-  //         name: data['name'],
-  //         age: data['age'],
-  //         profession: data['profession'],
-  //         purpose: data['purpose'],
-  //         username: data['username'],
-  //         password: data['password']
-  //       );
-  //     user.add(u);
-  //     });
-  //   }
-  //   catch(e){
-  //     print('Error is $e');
-  //   }
-  // }
 
   Future<void> sendData(Register user) async {
     try {

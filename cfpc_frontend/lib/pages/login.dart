@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:cfpc_frontend/pages/main.dart';
-import 'package:cfpc_frontend/pages/register.dart';
+
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
+
 import 'package:cfpc_frontend/constants/api.dart';
+
+import 'package:cfpc_frontend/pages/register.dart';
+import 'package:cfpc_frontend/pages/home.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,51 +17,57 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   Future<void> _login() async {
     final String username = _usernameController.text.trim();
     final String password = _passwordController.text.trim();
-    if (username.isEmpty || password.isEmpty){
+
+    if (username.isEmpty || password.isEmpty) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Username or password can not be empty!')),
-    );
+      _showError('Username or password can not be empty!');
       return;
     }
+
     final url = Uri.parse(loginURL);
     try {
       final response = await http.post(
-        url, headers: headers, body:jsonEncode({'username': username, 'password': password}),
+        url,
+        headers: headers,
+        body: jsonEncode(
+            <String, dynamic>{'username': username, 'password': password}),
       );
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+
         if (!mounted) return;
+
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-            builder: (context) => const MyHomePage(
-              title: 'CARBON FOOTPRINT CALCULATOR')),
+              builder: (context) =>
+                  const MyHomePage(title: 'CARBON FOOTPRINT CALCULATOR')),
           (Route route) => false,
         );
-      } else{
+      } else {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${response.body}')),
-        );
+        _showError('Error: ${response.body}');
       }
-    }
-    catch(e){
+    } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-    );
+      _showError('Error: $e');
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,8 +137,9 @@ class _LoginPageState extends State<LoginPage> {
                     padding: EdgeInsets.all(
                         MediaQuery.of(context).size.shortestSide * 0.005),
                     child: TextField(
-                      controller: TextEditingController(),
-                      obscureText: _obscurePassword, // can later add view password function
+                      controller: _passwordController,
+                      obscureText:
+                          _obscurePassword, // can later add view password function
                       decoration: InputDecoration(
                           border: OutlineInputBorder(
                               borderSide:
@@ -145,19 +156,18 @@ class _LoginPageState extends State<LoginPage> {
                             fontSize: MediaQuery.of(context).size.height * 0.03,
                           ),
                           suffixIcon: IconButton(
-                                  icon: Icon(
-                                    _obscurePassword
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
-                                    color: Colors.black,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _obscurePassword = !_obscurePassword;
-                                    });
-                                  },
-                                )
-                          ),
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: Colors.black,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          )),
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: MediaQuery.of(context).size.height * 0.03,

@@ -30,9 +30,11 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', ]
-IP_ADD = os.getenv('IP_ADD').split(',') # IP Address of Flutter App
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+IP_ADD = os.getenv('IP_ADD') # IP Address of Flutter App
+IP_ADD = IP_ADD.split(',')
 ALLOWED_HOSTS.extend(IP_ADD)
+
 
 # Application definition
 
