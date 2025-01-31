@@ -6,6 +6,8 @@ from django.db import models
 
 from django.utils import timezone
 
+from django.utils.dateparse import parse_datetime
+
 data = footprintdata_models.data
 
 # Serializers for inserting data
@@ -45,7 +47,6 @@ class TypeParameterSerializer(serializers.Serializer):
 
         permissible_activities = list(int(i) for i in list(data.get('Activities').values()))
         
-        
         if activity not in permissible_activities:
             raise serializers.ValidationError("Invalid activity selected!")
         
@@ -67,12 +68,16 @@ class TypeParameterSerializer(serializers.Serializer):
         
         return {'parameter': parameter}
 
-class FootprintsSerializer(serializers.ModelSerializer):
+class FootprintsSerializer(serializers.Serializer):
     
-    class Meta:
+    # class Meta:
 
-        model = footprintdata_models.Footprints
-        fields = ['user', 'activity', 'type_of_activity', 'parameter']
+    #     model = footprintdata_models.Footprints
+    #     fields = ['activity', 'type_of_activity', 'parameter']
+
+    activity = serializers.IntegerField()
+    type_of_activity = serializers.IntegerField()
+    parameter = serializers.FloatField()
 
     def validate(self, data1):
 
@@ -96,16 +101,20 @@ class FootprintsSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
 
         try:
+            
             validated_data['user'] = self.context['request'].user
+        
         except Exception as e:
             
-            serializers.ValidationError("Error: {e}")
+            serializers.ValidationError(f"Error: {e}")
         
         validated_data['activity'] = int(validated_data.get('activity'))
         validated_data['type_of_activity'] = int(validated_data.get('type_of_activity'))
         validated_data['parameter'] = float(validated_data.get('parameter'))
         
-        footprint = footprintdata_models.Footprints(validated_data)
+        footprint = footprintdata_models.Footprints(**validated_data)
+
+        footprint.save()
         
         return footprint
     
@@ -114,47 +123,37 @@ class FootprintsSerializer(serializers.ModelSerializer):
 
 # Serialisers for viewing data
 
-class FootprintsViewSerializer(serializers.ModelSerializer):
+class FootprintsViewSerializer(serializers.Serializer):
     
-    user = serializers.PrimaryKeyRelatedField(queryset = login_models.CustomUser.objects.all())
     time_start = serializers.DateTimeField()
     time_end = serializers.DateTimeField()
     activity = serializers.IntegerField()
 
     def validate(self, data1):
-        
-        if data1['time_start'] >= data1['time_end']:
+
+        time_start = (data1.get('time_start'))
+        time_end = (data1.get('time_end'))
+        activity = int(data1.get('activity'))
+
+        if time_start >= time_end:
             raise serializers.ValidationError("Invalid time range!")
         
-        if data1['activity'] not in data['Activities'].values():
+        if str(activity) not in data['Activities'].values():
             raise serializers.ValidationError("Invalid activity!")
         
         footprints = footprintdata_models.Footprints.objects.select_related('user').filter(
-                data1['user'],
-                activity = data1['activity'],
-                time_of_entry__range = (data1['time_start'], data1['time_end'])
-            )
+                user = self.context['request'].user,
+                activity = activity,
+                time_of_entry__range = (time_start, time_end))
+        
         if not footprints.exists():
             raise serializers.ValidationError("No activity found within the given time frame.")
         
         return data1
-    
-    def get_data(self, validated_data):
-        user = validated_data['user']
-        activity = validated_data['activity']
-        time_start = validated_data['time_start']
-        time_end = validated_data['time_end']
-
-        footprints = footprintdata_models.Footprints.objects.select_related('user').filter(user = user, activity = activity, time_of_entry__range = (time_start, time_end))
-
-        return {
-            "entries": list(footprints.values('time_of_entry', 'activity', 'type_of_activity', 'parameter', 'carbon_footprint', 'number_of_trees'))
-            # manipulation of data will be done by frontend (statistics and graphs)
-        }
 
     def to_representation(self, instance):
 
-        return self.get_data(self.validated_data)
+        return {}
     
 
 # Serializers for sharing data

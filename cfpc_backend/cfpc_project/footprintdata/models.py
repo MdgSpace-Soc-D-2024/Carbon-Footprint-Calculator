@@ -4,7 +4,7 @@ from rest_framework import exceptions
 
 import json
 
-from login import models as login_models
+import login.models as login_models
 
 import os
 
@@ -62,9 +62,9 @@ class Footprints(models.Model):
             if self.emission_factor is None:
                 raise exceptions.ValidationError(f"No emission factor found for activity {self.activity} and type {self.type_of_activity}.")
             
-            carbon_footprint = self.emission_factor*self.parameter
+            self.carbon_footprint = self.emission_factor*self.parameter
             
-            return carbon_footprint
+            return self.carbon_footprint
 
         except (Exception) as e:
             raise exceptions.ValidationError(f'Error: {str(e)}')
@@ -73,8 +73,10 @@ class Footprints(models.Model):
 
         if not self.carbon_footprint:
             self.carbon_footprint = self.calculate_carbon_footprint() 
+        
+        self.number_of_trees = self.carbon_footprint*TREE_CARBON_OFFSET
 
-        return self.carbon_footprint*TREE_CARBON_OFFSET
+        return self.number_of_trees 
 
     def save(self, *args, **kwargs):
         self.carbon_footprint = self.calculate_carbon_footprint()

@@ -1,6 +1,8 @@
 from rest_framework import status, response, views, permissions
 from footprintdata import serializers, models
 
+from django.utils.dateparse import parse_datetime
+
 class InsertDataView(views.APIView):
 
     permission_classes = [permissions.IsAuthenticated]
@@ -70,7 +72,7 @@ class InsertDataView(views.APIView):
 
                     if serializer.is_valid():
                         
-                        footprint = serializer.save(validated_data = request.data)
+                        footprint = serializer.save()
                         
                         return response.Response({
                             "message": "Carbon footprint calculated and saved successfully.",
@@ -82,36 +84,38 @@ class InsertDataView(views.APIView):
 
         
 class ViewDataView(views.APIView):
-
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def get(self, request, *args, **kwargs):
+        
+        activity = (request.query_params.get('activity'))
+        time_start = (request.query_params.get('time_start'))
+        time_end = (request.query_params.get('time_end'))
 
-        user = request.user
-        activity = request.query_params.get('activity')
-        time_start = request.query_params.get('time_start')
-        time_end = request.query_params.get('time_end')
-
-        if not all([user, activity, time_start, time_end]):
+        # Validate input presence
+        if not all([activity, time_start, time_end]):
             return response.Response(
                 {"detail": "Missing required parameters!"},
                 status = status.HTTP_400_BAD_REQUEST
-            ) 
-        # later may change this to showing all entries related to the inputs only, i.e. not making it mandatory to provide all.
-
-        serializer_data = {
-            'user': user,
-            'activity': activity,
-            'time_start': time_start,
-            'time_end': time_end
-        }
-
-        serializer = serializers.FootprintsViewSerializer(data = serializer_data)
+            )
+        
+        serializer = serializers.FootprintsViewSerializer(
+            data = {'activity': activity, 'time_start': time_start, 'time_end': time_end},
+            context = {'request': request}
+        )
 
         if serializer.is_valid():
-            data = serializer.get_data(serializer.validated_data)  # Get the footprint data
-            return response.Response(data, status = status.HTTP_200_OK)
-        
+            validated_data = serializer.validated_data
+            footprints = models.Footprints.objects.select_related('user').filter(
+                user = request.user,
+                activity = validated_data['activity'],
+                time_of_entry__range = (time_start, time_end)
+            )
+
+            data = list(footprints.values('time_of_entry', 'activity', 'type_of_activity', 'parameter', 'carbon_footprint', 'number_of_trees'))
+
+            return response.Response({"entries": data}, status = status.HTTP_200_OK)
+
         return response.Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
     
 class ShareDataView(views.APIView):
@@ -127,7 +131,7 @@ class ShareDataView(views.APIView):
         time_end = request.query_params.get('time_end')
         message = request.query_params.get('message')
 
-        if not all([sender, receiver_username, activity, time_start, time_end]):
+        if not all([activity, time_start, time_end]):
             return response.Response({'detail': "Missing required parameters!"}, status = status.HTTP_400_BAD_REQUEST)
         
         serializer_data = {
@@ -135,7 +139,8 @@ class ShareDataView(views.APIView):
             'receiver_username': receiver_username,
             'activity': activity,
             'time_start': time_start,
-            'time_end': time_end
+            'time_end': time_end,
+            'message': message
         } 
         
         serializer = serializers.FootprintShareSerializer(data = serializer_data)

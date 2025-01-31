@@ -6,7 +6,7 @@ from footprintdata import models as footprintdata_models
 from home import serializers
 
 class HomeView(views.APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         user = request.user
