@@ -21,3 +21,27 @@ class Register{
   }
 
 }
+
+enum Profession {
+  educator('Educator (Teacher/Professor)'),
+  engineer('Engineer/Technician'),
+  healthcare('Healthcare Professional'),
+  corporate('Corporate/Office Worker'),
+  service('Service Industry (Retail/Hospitality)'),
+  agriculture('Agriculture/Fisheries'),
+  selfemp('Self-Employed'),
+  other('Other');
+
+  const Profession(this.label);
+  final String label;
+}
+
+enum Purpose {
+  personal('Personal'),
+  research('Research/Academic Purposes'),
+  business('Business/Commercial'),
+  other('Other');
+
+  const Purpose(this.label);
+  final String label;
+}

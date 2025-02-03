@@ -4,10 +4,44 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:cfpc_frontend/constants/api.dart';
 
 import 'package:cfpc_frontend/pages/register.dart';
 import 'package:cfpc_frontend/pages/home.dart';
+
+Future<String?> refreshToken() async {
+  final prefs = await SharedPreferences.getInstance();
+  String? refreshToken = prefs.getString('refresh_token');
+
+  if (refreshToken == null) {
+    return null; // No refresh token, force logout
+  }
+
+  final url = Uri.parse(refreshURL);
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'refresh': refreshToken}),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data.containsKey('access')) {
+        await prefs.setString('access_token', data['access']); // Store new access token
+        return data['access'];
+      }
+    }
+  } catch (e) {
+    print("Error refreshing token: $e");
+  }
+
+  return null; // Return null on failure
+}
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -30,6 +64,8 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _login() async {
     final String username = _usernameController.text.trim();
     final String password = _passwordController.text.trim();
+    
+    final FlutterSecureStorage storage = FlutterSecureStorage();
 
     if (username.isEmpty || password.isEmpty) {
       if (!mounted) return;
@@ -39,30 +75,50 @@ class _LoginPageState extends State<LoginPage> {
 
     final url = Uri.parse(loginURL);
     try {
+      
       final response = await http.post(
         url,
         headers: headers,
         body: jsonEncode(
-            <String, dynamic>{'username': username, 'password': password}),
+            <String, String>{'username': username, 'password': password}),
       );
 
       if (response.statusCode == 200) {
+        
         final data = jsonDecode(response.body);
-
-        if (!mounted) return;
-
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  const MyHomePage(title: 'CARBON FOOTPRINT CALCULATOR')),
-          (Route route) => false,
-        );
-      } else {
+        
+        if (data.containsKey('access')) {
+          
+          await storage.write(key: 'jwt_token', value: data['access']);
+          
+          final prefs = await SharedPreferences.getInstance(); // save token to shared preferences for easy access
+          
+          await prefs.setString('access_token', data['access']);
+          
+          if (!mounted) return;
+          
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    const MyHomePage(title: 'CARBON FOOTPRINT CALCULATOR')),
+            (Route route) => false,
+          );
+        } 
+        
+        else {
+          if (!mounted) return;
+          _showError('Error: Token not found in response!');
+        }
+      }
+      
+      else {
         if (!mounted) return;
         _showError('Error: ${response.body}');
       }
-    } catch (e) {
+    } 
+    
+    catch (e) {
       if (!mounted) return;
       _showError('Error: $e');
     }
@@ -239,7 +295,7 @@ class _LoginPageState extends State<LoginPage> {
             child: Text(
               'Carbon Footprint Calculator - © 2025 All Rights Reserved',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white, fontSize: 16),
+              style: TextStyle(color: Colors.white, fontSize: 12.0),
             ),
           ),
         ]));

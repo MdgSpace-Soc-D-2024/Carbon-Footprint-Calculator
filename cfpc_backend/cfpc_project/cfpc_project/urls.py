@@ -19,6 +19,8 @@ from django.urls import path, include
 from rest_framework import routers
 from login import views
 
+from rest_framework_simplejwt.views import TokenRefreshView
+
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
@@ -38,4 +40,7 @@ urlpatterns = [
 
     # Browsable API login/logout
     path('api-auth/', include('rest_framework.urls', namespace = 'rest_framework')),
+
+    # To refresh the token
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

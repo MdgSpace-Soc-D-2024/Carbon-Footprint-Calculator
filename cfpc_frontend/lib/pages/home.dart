@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cfpc_frontend/constants/api.dart';
-import 'package:cfpc_frontend/main.dart';
 import 'package:cfpc_frontend/pages/login.dart';
+import 'package:cfpc_frontend/pages/logout.dart';
+import 'package:cfpc_frontend/pages/viewfootprints.dart';
+import 'package:cfpc_frontend/pages/insertfootprints.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -16,8 +18,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final FlutterSecureStorage storage = FlutterSecureStorage();
-  String _username = 'Anonymous';
+  String? _username = 'Anonymous';
   double _carbonFootprints = 0.0;
   int _numberOfTrees = 0;
   bool _isLoading = true;
@@ -30,7 +31,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _fetchData() async {
-    final String? token = await storage.read(key: "auth_token");
+    
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access_token');
 
     if (token == null) {
       setState(() {
@@ -53,11 +56,11 @@ class _MyHomePageState extends State<MyHomePage> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
-          _username = data['username'] ?? 'Anonymous';
-          _carbonFootprints = (data['carbon_footprints'] ?? 0.0).toDouble();
-          _numberOfTrees = (data['number_of_trees'] ?? 0).toInt();
-          _isLoading = false;
           _loggedIn = true;
+          _username = data['username'] ?? 'Anonymous';
+          _carbonFootprints = (data['total_carbon_footprints'] ?? 0.0).toDouble();
+          _numberOfTrees = (data['total_number_of_trees'] ?? 0).toInt();
+          _isLoading = false;
         });
       } else {
         _showError(
@@ -68,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
         });
       }
     } catch (e) {
-      _showError('Failed to connect to the server!');
+      _showError('Failed to connect to the server! $e');
       setState(() {
         _isLoading = false;
         _loggedIn = false;
@@ -79,6 +82,17 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    _fetchData();
+    FocusManager.instance.primaryFocus?.addListener(() {
+    if (FocusManager.instance.primaryFocus == null) {
+      _fetchData(); // Refresh data when the user returns
+    }
+  });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _fetchData();
   }
 
@@ -136,6 +150,70 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                              Row(
+                                // Navigation
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    height:
+                                        MediaQuery.of(context).size.shortestSide * 0.15,
+                                    width:
+                                        MediaQuery.of(context).size.shortestSide * 0.15,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black,
+                                      borderRadius: BorderRadius.circular(
+                                          MediaQuery.of(context).size.shortestSide *
+                                              0.05),
+                                    ),
+                                    child: IconButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => const InsertFootprintsPage(),
+                                            ),
+                                          );
+                                        },
+                                        icon: Icon(
+                                          Icons.add,
+                                          size: MediaQuery.of(context).size.shortestSide *
+                                              0.1,
+                                          color: Colors.green,
+                                        )),
+                                  ),
+                                  SizedBox(
+                                      width: MediaQuery.of(context).size.width * 0.01),
+                                  Container(
+                                    height:
+                                        MediaQuery.of(context).size.shortestSide * 0.15,
+                                    width:
+                                        MediaQuery.of(context).size.shortestSide * 0.15,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black,
+                                      borderRadius: BorderRadius.circular(
+                                          MediaQuery.of(context).size.shortestSide *
+                                              0.05),
+                                    ),
+                                    child: IconButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => const ViewFootprintsPage(),
+                                            ),
+                                          );
+                                        },
+                                        icon: Icon(
+                                          Icons.bar_chart,
+                                          size: MediaQuery.of(context).size.shortestSide *
+                                              0.1,
+                                          color: Colors.green,
+                                        )),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                  height: MediaQuery.of(context).size.height * 0.02),
                               Text(
                                 'Welcome, $_username!',
                                 style: TextStyle(
@@ -193,7 +271,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Text(
               'Carbon Footprint Calculator - © 2025 All Rights Reserved',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white, fontSize: 16),
+              style: TextStyle(color: Colors.white, fontSize: 12.0),
             ),
           ),
         ],

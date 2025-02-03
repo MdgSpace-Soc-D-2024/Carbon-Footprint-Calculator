@@ -27,6 +27,9 @@ class LoginSerializer(serializers.Serializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only = True, style = {'input_type': 'password'})
+    age = serializers.IntegerField(required = False)
+    profession = serializers.IntegerField(required = False)
+    purpose_of_joining = serializers.IntegerField(required = False)
 
     class Meta:
         model = models.CustomUser

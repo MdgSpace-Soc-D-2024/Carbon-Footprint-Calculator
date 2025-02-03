@@ -1,7 +1,9 @@
 from rest_framework import status, response, views, permissions
 from footprintdata import serializers, models
 
-from django.utils.dateparse import parse_datetime
+from django.utils import timezone
+from datetime import datetime
+
 
 class InsertDataView(views.APIView):
 
@@ -117,56 +119,3 @@ class ViewDataView(views.APIView):
             return response.Response({"entries": data}, status = status.HTTP_200_OK)
 
         return response.Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
-    
-class ShareDataView(views.APIView):
-
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-
-        sender = request.user
-        receiver_username = request.query_params.get('receiver_username') # username
-        activity = request.query_params.get('activity')
-        time_start = request.query_params.get('time_start')
-        time_end = request.query_params.get('time_end')
-        message = request.query_params.get('message')
-
-        if not all([activity, time_start, time_end]):
-            return response.Response({'detail': "Missing required parameters!"}, status = status.HTTP_400_BAD_REQUEST)
-        
-        serializer_data = {
-            'sender': sender,
-            'receiver_username': receiver_username,
-            'activity': activity,
-            'time_start': time_start,
-            'time_end': time_end,
-            'message': message
-        } 
-        
-        serializer = serializers.FootprintShareSerializer(data = serializer_data)
-
-        serializer.is_valid(raise_exception = True)
-
-        serializer.save()
-
-        data = serializer.get_data(serializer.validated_data)
-
-        return response.Response(data = data, status = status.HTTP_200_OK)
-    
-class ViewSharedDataView(views.APIView):
-
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-
-        receiver = request.user
-
-        serializer = serializers.FootprintsViewSharedSerializer(context = {'receiver': receiver})
-
-        serializer.is_valid(raise_exception = True)
-
-        serializer.save()
-
-        data = serializer.get_data(serializer.validated_data)
-
-        return response.Response(data = data, status = status.HTTP_200_OK)

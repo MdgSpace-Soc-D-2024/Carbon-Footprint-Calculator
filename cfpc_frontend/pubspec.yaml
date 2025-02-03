@@ -36,12 +36,17 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   http: any
+  flutter_datetime_picker_plus: ^2.2.0
+  syncfusion_flutter_datepicker: ^28.2.3
+  syncfusion_flutter_charts: ^28.2.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   
   flutter_secure_storage: ^9.2.4
+  
+  shared_preferences: ^2.3.2
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

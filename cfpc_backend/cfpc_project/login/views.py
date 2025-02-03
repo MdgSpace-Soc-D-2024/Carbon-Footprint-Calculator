@@ -22,12 +22,12 @@ class CustomUserViewSet(viewsets.ModelViewSet):
     @decorators.action(detail=False, methods=['put'])
     def update_profile(self, request):
         user = request.user
-        serializer = self.get_serializer(user, data=request.data, partial=True)
+        serializer = self.get_serializer(user, data = request.data, partial = True)
         
         if serializer.is_valid():
             serializer.save()
             return response.Response(serializer.data)
-        return response.Response(serializer.errors, status=400)
+        return response.Response(serializer.errors, status = 400)
 
 
 # Helper function to generate JWT tokens for a user
@@ -87,8 +87,14 @@ class RegisterView(views.APIView):
 
         user = serializer.save()
 
-        return response.Response({'message': f'Welcome, {user.username}! Registration with Carbon Footprint Calculator was successful! Login to add your activities!'}, 
-                                 user = serializer.to_representation(),
+        return response.Response({
+                                    'message': f'Welcome, {user.username}! Registration with Carbon Footprint Calculator was successful! Login to add your activities!',
+                                    'username': user.username,
+                                    'name': user.name,
+                                    'age': user.age,
+                                    'profession': user.profession,
+                                    'purpose_of_joining': user.purpose_of_joining
+                                },
                                  status = status.HTTP_201_CREATED)
 
 class LogoutView(views.APIView):
@@ -113,4 +119,4 @@ class LogoutView(views.APIView):
             return response.Response({'message': 'Successfully logged out!'}, status = status.HTTP_200_OK)
         
         except Exception as e:
-            return response.Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return response.Response({'error': str(e)}, status = status.HTTP_400_BAD_REQUEST)

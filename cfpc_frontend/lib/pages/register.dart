@@ -1,35 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:cfpc_frontend/pages/home.dart';
+import 'package:cfpc_frontend/pages/login.dart';
 import 'package:cfpc_frontend/models/register.dart';
 
 import 'package:cfpc_frontend/constants/api.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-enum Profession {
-  educator('Educator (Teacher/Professor)'),
-  engineer('Engineer/Technician'),
-  healthcare('Healthcare Professional'),
-  corporate('Corporate/Office Worker'),
-  service('Service Industry (Retail/Hospitality)'),
-  agriculture('Agriculture/Fisheries'),
-  selfemp('Self-Employed'),
-  other('Other');
-
-  const Profession(this.label);
-  final String label;
-}
-
-enum Purpose {
-  personal('Personal'),
-  research('Research/Academic Purposes'),
-  business('Business/Commercial'),
-  other('Other');
-
-  const Purpose(this.label);
-  final String label;
-}
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -39,14 +15,20 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  int age = 18;
-  Profession profession = Profession.other;
-  Purpose purpose = Purpose.other;
+  int _age = 18;
+  Profession _profession = Profession.other;
+  Purpose _purpose = Purpose.other;
   bool _obscurePassword = true;
 
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController usernameController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
 
   Future<void> sendData(Register user) async {
     try {
@@ -65,32 +47,26 @@ class _RegisterPageState extends State<RegisterPage> {
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  const MyHomePage(
-                      title:
-                          'CARBON FOOTPRINT CALCULATOR')),
+                  const LoginPage()),
           (Route route) => false,
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${response.body}')),
-        );
+        _showError('Error: ${response.body}');
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-    );
+      _showError('Error: $e');
     }
   }
 
   void registerUser() {
     final user = Register(
-      name: nameController.text.trim(),
-      age: age,
-      profession: profession.index + 1,
-      purpose: purpose.index + 1,
-      username: usernameController.text.trim(),
-      password: passwordController.text.trim(),
+      name: _nameController.text.trim(),
+      age: _age,
+      profession: _profession.index + 1,
+      purpose: _purpose.index + 1,
+      username: _usernameController.text.trim(),
+      password: _passwordController.text.trim(),
     );
 
     sendData(user);
@@ -98,18 +74,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
   @override
   void dispose() {
-    nameController.dispose();
-    usernameController.dispose();
-    passwordController.dispose();
+    _nameController.dispose();
+    _usernameController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
-
-  // @override
-  // void initState(){
-  //   super.initState();
-  //   user = List(Register(name: '', age: 18, profession: Profession.other, purpose: Purpose.other, username: '', password: ''));
-  //   sendData(user);
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -143,9 +112,9 @@ class _RegisterPageState extends State<RegisterPage> {
                             Padding(
                                 padding: EdgeInsets.all(
                                     MediaQuery.of(context).size.shortestSide *
-                                        0.01),
+                                        0.005),
                                 child: TextField(
-                                  controller: nameController,
+                                  controller: _nameController,
                                   decoration: InputDecoration(
                                       border: OutlineInputBorder(
                                           borderSide: BorderSide(
@@ -155,7 +124,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                         size: MediaQuery.of(context)
                                                 .size
                                                 .shortestSide *
-                                            0.05,
+                                            0.04,
                                       ),
                                       iconColor: Colors.black,
                                       labelText: 'Name',
@@ -163,13 +132,13 @@ class _RegisterPageState extends State<RegisterPage> {
                                         color: Colors.black,
                                         fontSize:
                                             MediaQuery.of(context).size.height *
-                                                0.03,
+                                                0.02,
                                       )),
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontSize:
                                         MediaQuery.of(context).size.height *
-                                            0.03,
+                                            0.02,
                                   ),
                                   minLines: 1,
                                   maxLines: 1,
@@ -180,32 +149,31 @@ class _RegisterPageState extends State<RegisterPage> {
                             Padding(
                                 padding: EdgeInsets.all(
                                     MediaQuery.of(context).size.shortestSide *
-                                        0.01),
+                                        0.005),
                                 child: Slider(
-                                  value: age.toDouble(),
+                                  value: _age.toDouble(),
                                   min: 5,
                                   max: 100,
                                   divisions: 100,
-                                  label: 'Age $age',
+                                  label: 'Age $_age',
                                   onChanged: (double value) {
                                     setState(() {
-                                      age = value.toInt();
+                                      _age = value.toInt();
                                     });
                                   },
                                 )),
                             Padding(
                                 padding: EdgeInsets.all(
                                     MediaQuery.of(context).size.shortestSide *
-                                        0.01),
+                                        0.005),
                                 child: DropdownMenu<Purpose>(
-                                  initialSelection: purpose,
-                                  // controller
+                                  initialSelection: _purpose,
                                   requestFocusOnTap: true,
                                   label: const Text('Purpose of Joining',
                                       style: TextStyle(color: Colors.black)),
                                   onSelected: (Purpose? selectedPurpose) {
                                     setState(() {
-                                      purpose =
+                                      _purpose =
                                           selectedPurpose ?? Purpose.other;
                                     });
                                   },
@@ -221,10 +189,9 @@ class _RegisterPageState extends State<RegisterPage> {
                             Padding(
                                 padding: EdgeInsets.all(
                                     MediaQuery.of(context).size.shortestSide *
-                                        0.01),
+                                        0.005),
                                 child: DropdownMenu<Profession>(
-                                  initialSelection: Profession.other,
-                                  // controller
+                                  initialSelection: _profession,
                                   requestFocusOnTap: true,
                                   label: const Text(
                                     'Profession',
@@ -232,7 +199,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   ),
                                   onSelected: (Profession? selectedProfession) {
                                     setState(() {
-                                      profession = selectedProfession ??
+                                      _profession = selectedProfession ??
                                           Profession.other;
                                     });
                                   },
@@ -248,9 +215,9 @@ class _RegisterPageState extends State<RegisterPage> {
                             Padding(
                                 padding: EdgeInsets.all(
                                     MediaQuery.of(context).size.shortestSide *
-                                        0.01),
+                                        0.005),
                                 child: TextField(
-                                  controller: usernameController,
+                                  controller: _usernameController,
                                   decoration: InputDecoration(
                                       border: OutlineInputBorder(
                                           borderSide: BorderSide(
@@ -260,7 +227,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                         size: MediaQuery.of(context)
                                                 .size
                                                 .shortestSide *
-                                            0.05,
+                                            0.04,
                                       ),
                                       iconColor: Colors.black,
                                       labelText: 'Username',
@@ -268,13 +235,13 @@ class _RegisterPageState extends State<RegisterPage> {
                                         color: Colors.black,
                                         fontSize:
                                             MediaQuery.of(context).size.height *
-                                                0.03,
+                                                0.02,
                                       )),
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontSize:
                                         MediaQuery.of(context).size.height *
-                                            0.03,
+                                            0.02,
                                   ),
                                   minLines: 1,
                                   maxLines: 1,
@@ -286,7 +253,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   MediaQuery.of(context).size.shortestSide *
                                       0.005),
                               child: TextField(
-                                controller: passwordController,
+                                controller: _passwordController,
                                 obscureText:
                                     _obscurePassword, // can later add view password function
                                 decoration: InputDecoration(
@@ -298,7 +265,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                       size: MediaQuery.of(context)
                                               .size
                                               .shortestSide *
-                                          0.05,
+                                          0.04,
                                     ),
                                     iconColor: Colors.black,
                                     labelText: 'Password',
@@ -306,7 +273,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                       color: Colors.black,
                                       fontSize:
                                           MediaQuery.of(context).size.height *
-                                              0.03,
+                                              0.02,
                                     ),
                                     suffixIcon: IconButton(
                                       icon: Icon(
@@ -314,6 +281,10 @@ class _RegisterPageState extends State<RegisterPage> {
                                             ? Icons.visibility
                                             : Icons.visibility_off,
                                         color: Colors.black,
+                                        size: MediaQuery.of(context)
+                                            .size
+                                            .shortestSide *
+                                            0.04,
                                       ),
                                       onPressed: () {
                                         setState(() {
@@ -324,7 +295,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontSize:
-                                      MediaQuery.of(context).size.height * 0.03,
+                                      MediaQuery.of(context).size.height * 0.02,
                                 ),
                                 minLines: 1,
                                 maxLines: 1,
@@ -338,9 +309,9 @@ class _RegisterPageState extends State<RegisterPage> {
                                         0.01),
                                 child: SizedBox(
                                     width:
-                                        MediaQuery.of(context).size.width * 0.2,
+                                        MediaQuery.of(context).size.width * 0.4,
                                     height: MediaQuery.of(context).size.height *
-                                        0.1,
+                                        0.05,
                                     child: ElevatedButton(
                                         onPressed: () {
                                           registerUser();
@@ -352,7 +323,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                             fontSize: MediaQuery.of(context)
                                                     .size
                                                     .height *
-                                                0.03,
+                                                0.02,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         )))),
@@ -370,7 +341,7 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Text(
               'Carbon Footprint Calculator - © 2025 All Rights Reserved',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white, fontSize: 16),
+              style: TextStyle(color: Colors.white, fontSize: 12.0),
             ),
           ),
         ]));
